@@ -11,29 +11,70 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     return 0;
 }
 
-Customer::Customer() {
-    /*sqlite3* db;
-    int rc = sqlite3_open("database.db", &db);
-    std::cout << "ok\n";
-    const char sql[] = "CREATE TABLE words("
-                      "ID INT PRIMARY       KEY    NOT NULL,"
-                      "CURRENT_WORD         TEXT   NOT NULL,"
-                      "OCCERANCES           INT    NOT NULL);";
-    rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
-    const char* ins = "INSERT INTO words VALUES (1, 'a', 1)";
-    rc = sqlite3_exec(db, ins, NULL, NULL, NULL);
-    const char* select = "SELECT * FROM words";
-    rc = sqlite3_exec(db, select, callback, NULL, NULL);*/
+Customer::Customer() { }
+
+int number_of_customers;
+
+static int number_callback(void* data, int argc, char **argv, 
+                           char **azColName) {
+    ++number_of_customers;
+    return 0;
 }
 
-void Customer::set_name(int id, const std::string& name) { }
+void Customer::add_customer(sqlite3* db, const std::string& name,
+                            const std::string& surname) {
+    number_of_customers = 0;
+    std::string update = "SELECT * FROM USERS";
+    int rc = sqlite3_exec(db, update.c_str(), number_callback, NULL, NULL);
 
-void Customer::set_surname(int id, const std::string& surname) { }
+    update = "INSERT INTO USERS VALUES ("
+             + std::__cxx11::to_string(number_of_customers + 1) + ", '" + name + 
+             "', '" + surname + "', NULL, NULL)";
+    rc = sqlite3_exec(db, update.c_str(), NULL, NULL, NULL);
+    std::cout << "Added customer with ID=" << number_of_customers + 1 << '\n';
+}
 
-void Customer::set_address(int id, const std::string& address) { }
+void Customer::set_name(sqlite3* db, int id, const std::string& name) {
+    std::string update = "UPDATE USERS set NAME = '" + name + "' WHERE ID = " +
+        std::__cxx11::to_string(id);
+    int rc = sqlite3_exec(db, update.c_str(), NULL, NULL, NULL);
+}
 
-void Customer::set_passport(int id, int passport) { }
+void Customer::set_surname(sqlite3* db, int id, const std::string& surname) {
+    std::string update = "UPDATE USERS set SURNAME = '" + surname + 
+        "' WHERE ID = " + std::__cxx11::to_string(id);
+    int rc = sqlite3_exec(db, update.c_str(), NULL, NULL, NULL);
+}
 
-void Customer::update_limit(int id) { }
+void Customer::set_address(sqlite3* db, int id, const std::string& address) { 
+    std::string update = "UPDATE USERS set ADDRESS = '" + address + 
+        "' WHERE ID = " + std::__cxx11::to_string(id);
+    int rc = sqlite3_exec(db, update.c_str(), NULL, NULL, NULL);
+}
 
-bool Customer::has_limit(int id) { return false; }
+void Customer::set_passport(sqlite3* db, int id, int passport) {
+    std::string update = "UPDATE USERS set PASSPORT = '" +
+        std::__cxx11::to_string(passport) +  "' WHERE ID = " + 
+        std::__cxx11::to_string(id);
+    int rc = sqlite3_exec(db, update.c_str(), NULL, NULL, NULL);
+}
+
+bool has_limit_flag;
+static int has_limit_callback(sqlite3* db, void *data, int argc, char **argv,
+                              char **azColName) {
+    for (int i = 0; i < argc; ++i) {
+        if (!argv[i]) {
+            has_limit_flag = true;
+            return 0;
+        }
+    }
+    return 0;
+}
+
+bool Customer::has_limit(sqlite3* db, int id) {
+    has_limit_flag = false;
+    std::string func = "SELECT * FROM USERS WHERE ID = " + 
+                       std::__cxx11::to_string(id);
+    int rc = sqlite3_exec(db, func.c_str(), NULL, NULL, NULL);
+    return has_limit_flag;
+}
