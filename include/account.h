@@ -1,25 +1,35 @@
+#pragma once
 #include <iostream>
 
 class Account {
-private:
-    int id;
 public:
-    virtual void DepositMoney(const int AccountId) = 0;
-    virtual void WithdrawMoney(const int AccountId) = 0;
-    virtual void TransferMoney(const int AccountId) = 0;
+    explicit Account();
+    virtual void DepositMoney(int id, int money);
+    virtual void WithdrawMoney(int id, int money);
+    virtual void TransferMoney(int id, int destination_id, int money);
 };
 
 class Debit: public Account {
 public:
-    void DepositMoney(const int AccountId) override;
+    explicit Debit();
+    void DepositMoney(int id, int money) final;
+    void WithdrawMoney(int id, int money) final;
+    void TransferMoney(int id, int destination_id, int money) final;
 };
 
 class Credit: public Account {
 public:
-    void WithdrawMoney(const int AccountId) = 0;
+    explicit Credit();
+    void DepositMoney(int id, int money) final;
+    void WithdrawMoney(int id, int money) final;
+    void TransferMoney(int id, int destination_id, int money) final;
 };
 
 class Deposit: public Account {
 public:
-    void WithdrawMoney(const int AccountId) = 0;
+    explicit Deposit();
+    void DepositMoney(int id, int money) final;
+    void WithdrawMoney(int id, int money) final;
+    void TransferMoney(int id, int destination, int money) final;
 };
+
