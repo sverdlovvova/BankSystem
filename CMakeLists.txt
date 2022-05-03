@@ -24,5 +24,6 @@ INSTALL(TARGETS Main
         PUBLIC_HEADER
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
-#target_link_libraries(Main account)
-#target_link_libraries(Main customer)
+target_link_libraries(Main account)
+target_link_libraries(Main customer)
+target_link_libraries(Main bank)

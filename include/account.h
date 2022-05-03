@@ -38,3 +38,4 @@ public:
     void add_account(sqlite3* db, int id_user, int id_bank) final;
 };
 
+std::string get_type(sqlite3* db, int id);
