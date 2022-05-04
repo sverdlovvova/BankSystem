@@ -22,11 +22,13 @@ const char accounts[] = "CREATE TABLE ACCOUNTS("
                           "TYPE      TEXT    NOT NULL,"
                           "USER_ID   INT     NOT NULL,"
                           "BANK_ID   INT     NOT NULL,"
-                          "MONEY     INT     NOT NULL);";
+                          "MONEY     INT     NOT NULL,"
+                          "DATE      INT);";/*Last operation time for Credit
+                                              and finish time for Deposit*/
 
 sqlite3* db;
 
-void create_db_tables() {
+void create_db() {
     int rc = sqlite3_open("database.db", &db); 
     rc = sqlite3_exec(db, users, NULL, NULL, NULL);
     rc = sqlite3_exec(db, banks, NULL, NULL, NULL);
@@ -34,12 +36,13 @@ void create_db_tables() {
 }
 
 int main() {
-    create_db_tables();
+    create_db();
     Bank banks;
     Customer customers;
     Debit debit;
     Credit credit;
     Deposit deposit;
+    Undo undo;
     while (true) {
         std::string operation;
         getline(std::cin, operation);
@@ -129,61 +132,83 @@ int main() {
             customers.set_passport(db, user_id, new_passport);
         }
         if (operation == "deposit") {
-            int user_id;
+            int account_id;
             int money;
-            std::cout << "User ID:\n";
-            std::cin >> user_id;
+            std::cout << "Account ID:\n";
+            std::cin >> account_id;
             std::cout << "Money to deposit:\n";
             std::cin >> money;
-            std::string type = get_type(db, user_id);
+            std::string type = get_type(db, account_id);
+            std::cout << type << '\n';
             if (type == "Debit") {
-                debit.deposit_money(db, user_id, money);
+                if (debit.deposit_money(db, account_id, money)) {
+                    undo.add_operation("deposit", db, account_id, money);
+                }
             }
             if (type == "Credit") {
-                credit.deposit_money(db, user_id, money);
+                if (credit.deposit_money(db, account_id, money)) {
+                    undo.add_operation("deposit", db, account_id, money);
+                }
             }
             if (type == "Deposit") {
-                deposit.deposit_money(db, user_id, money);
+                if (deposit.deposit_money(db, account_id, money)) {
+                    undo.add_operation("deposit", db, account_id, money);
+                }
             }
         }
         if (operation == "withdraw") {
-            int user_id;
+            int account_id;
             int money;
-            std::cout << "User ID:\n";
-            std::cin >> user_id;
+            std::cout << "Account ID:\n";
+            std::cin >> account_id;
             std::cout << "Money to withdraw:\n";
             std::cin >> money;
-            std::string type = get_type(db, user_id);
+            std::string type = get_type(db, account_id);
             if (type == "Debit") {
-                debit.withdraw_money(db, user_id, money);
+                if (debit.withdraw_money(db, account_id, money)) {
+                    undo.add_operation("withdraw", db, account_id, money);
+                }
             }
             if (type == "Credit") {
-                credit.withdraw_money(db, user_id, money);
+                if (credit.withdraw_money(db, account_id, money)) {
+                    undo.add_operation("withdraw", db, account_id, money);
+                }
             }
             if (type == "Deposit") {
-                deposit.withdraw_money(db, user_id, money);
+                if (deposit.withdraw_money(db, account_id, money)) {
+                    undo.add_operation("withdraw", db, account_id, money);
+                }
             }
         }
         if (operation == "transfer") {
-            int user_id;
+            int account_id;
             int destination_id;
             int money;
-            std::cout << "User ID:\n";
-            std::cin >> user_id;
-            std::cout << "Destination user ID:\n";
+            std::cout << "Account ID:\n";
+            std::cin >> account_id;
+            std::cout << "Destination account ID:\n";
             std::cin >> destination_id;
-            std::cout << "Money to tranfer:\n";
+            std::cout << "Money to transfer:\n";
             std::cin >> money;
-            std::string type = get_type(db, user_id);
+            std::string type = get_type(db, account_id);
             if (type == "Debit") {
-                debit.transfer_money(db, user_id, destination_id, money);
+                if (debit.transfer_money(db, account_id, destination_id, money)) {
+                    undo.add_operation("transfer", db, account_id, destination_id,  money);
+                }
             }
             if (type == "Credit") {
-                credit.transfer_money(db, user_id, destination_id, money);
+                if (credit.transfer_money(db, account_id, destination_id, money)) {
+                    undo.add_operation("transfer", db, account_id, destination_id, money);
+                }
             }
             if (type == "Deposit") {
-                deposit.transfer_money(db, user_id, destination_id, money);
+                if (deposit.transfer_money(db, account_id, destination_id, money)) {
+                    undo.add_operation("transfer", db, account_id, destination_id, money);
+                }
             }
+        }
+        if (operation == "undo") {
+            undo.undo();
         }
     }
 }
