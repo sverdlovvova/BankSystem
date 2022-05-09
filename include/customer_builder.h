@@ -1,67 +1,39 @@
+#pragma once
 #include "customer.h"
 
 class Builder {
 private:
     Customer* customer;
 public:
-    void reset() {
-        this->customer = new Customer()
-    }
+    void reset();
 
-    void addName(std::string newName) {
-        this->customer.name = newName;
-    }
+    void addName(std::string newName);
     
-    void addSurname(std::string newSurname) {
-        this->customer.surmane = newSurname;
-    }
+    void addSurname(std::string newSurname);
     
-    void addAddress(std::string newAddress) {
-        this->customer.address = newAddress;
-    }
+    void addAddress(std::string newAddress);
 
-    Customer* getResult() {
-        Customer* result = this->product;
-        reset();
-        return result;
-    }
+    Customer* getResult();
 
-    ~Builder() {
-        delete customer;
-    }
+    ~Builder();
 };
 
 class Director {
 private:
     Builder* builder;
 public:
-    void setBuilder(Builder* builder) {
-        this->builder = builder;   
-    }
+    void setBuilder(Builder* builder);
 
     void BuildFullCustomer(std::string name,
                            std::string surname,
                            std::string address,
-                           int passport) {
-        this->builder->addName(name);
-        this->builder->addSurname(surname);
-        this->builder->addAddress(address);
-        this->builder->addPassport(pasport);
-    }
+                           int passport);
 
     void BuildCustomerWithoutAddress(std::string name,
                                      std::string surname,
-                                     int passport) {
-        this->builder->addName(name);
-        this->builder->addSurname(surname);
-        this->builder->addPassport(pasport);
-    }
+                                     int passport);
         
     void BuildCustomerWithoutPassport(std::string name,
                                       std::string surname,
-                                      std::string address) {
-        this->builder->addName(name);
-        this->builder->addSurname(surname);
-        this->builder->addAddress(address);
-    }
+                                      std::string address);
 };
